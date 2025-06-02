@@ -59,7 +59,7 @@ const ChatbotLauncher: React.FC = () => {
         <DialogContent sx={{ p: 0, height: '100%' }}>
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <iframe
-              src="https://copilotstudio.microsoft.com/embed/agent/YOUR_AGENT_ID"
+              src="https://copilotstudio.microsoft.com/environments/Default-de6b5354-c00a-4c06-888c-81936c42d6f2/bots/cr41e_planCheckr/webchat?__version__=2"
               style={{
                 width: '100%',
                 height: '100%',

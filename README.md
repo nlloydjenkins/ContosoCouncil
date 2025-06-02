@@ -48,6 +48,54 @@ The Contoso Council Planning Portal is a comprehensive digital platform that ena
 - Node.js (version 18 or higher)
 - npm or yarn
 
+### Environment Configuration
+
+The application supports both development and production environments with automatic configuration.
+
+#### 1. Copy the environment template:
+```bash
+cp .env.example .env
+```
+
+#### 2. Configure your environment variables in `.env`:
+```env
+# Azure AD Configuration
+VITE_AZURE_TENANT_ID=your_tenant_id_here
+VITE_AZURE_CLIENT_ID=your_client_id_here
+VITE_AZURE_CLIENT_SECRET=your_client_secret_here
+
+# DirectLine Configuration
+VITE_DIRECTLINE_SECRET=your_directline_secret_here
+
+# Application Configuration
+# For development: http://localhost:3000
+# For production: https://thankful-sea-03a16bc03.6.azurestaticapps.net
+VITE_APP_BASE_URL=http://localhost:3000
+```
+
+#### Environment-Specific Configuration:
+
+**Development (localhost:3000):**
+- Uses `.env.development` for base URL
+- Automatically configured for local development
+- Run with: `npm run dev`
+
+**Production (Azure Static Web Apps):**
+- Uses `.env.production` for base URL  
+- Automatically configured for: `https://thankful-sea-03a16bc03.6.azurestaticapps.net`
+- Build with: `npm run build:prod`
+
+### Azure AD App Registration Setup
+
+For the authentication to work properly, ensure your Azure AD app registration includes:
+
+**Redirect URIs:**
+- `http://localhost:3000` (for development)
+- `https://thankful-sea-03a16bc03.6.azurestaticapps.net` (for production)
+
+**API Permissions:**
+- Bot Framework (https://api.botframework.com/.default)
+
 ### Installation
 
 1. Clone the repository:

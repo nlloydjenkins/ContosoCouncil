@@ -27,30 +27,29 @@ const Header: React.FC = () => {
             <Logo />
           </Box>
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-            {navItems.map((item) => (
-              <Button
+            {navItems.map((item) => (              <Button
                 key={item.path}
                 component={Link}
                 to={item.path}
                 className="eco-button"
                 sx={{
-                  color: '#2E7D32 !important',
+                  color: 'white !important',
                   bgcolor: location.pathname === item.path 
                     ? 'rgba(255,255,255,0.2)' 
                     : 'transparent',
                   '&:hover': {
                     bgcolor: 'rgba(255,255,255,0.15)',
                     transform: 'translateY(-1px)',
-                    color: '#2E7D32 !important',
+                    color: 'white !important',
                   },
                   '&:visited': {
-                    color: '#2E7D32 !important',
+                    color: 'white !important',
                   },
                   '&:link': {
-                    color: '#2E7D32 !important',
+                    color: 'white !important',
                   },
                   '& .MuiButton-startIcon': {
-                    color: '#2E7D32 !important',
+                    color: 'white !important',
                   },
                   borderRadius: 0,
                   px: 3,

@@ -15,11 +15,13 @@ import { Link } from 'react-router-dom'
 import { Visibility, CloudUpload, Add } from '@mui/icons-material'
 import { getApplications, Application } from '../services/applicationService'
 import ChatbotLauncher from '../components/ChatbotLauncher'
-import ApplicationChatbot from '../components/ApplicationChatbot'
+import ApplicationStatusModal from '../components/ApplicationStatusModal'
 
 const MyApplications: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedApplicationRef, setSelectedApplicationRef] = useState<string>('')
 
   useEffect(() => {
     const loadApplications = async () => {
@@ -34,6 +36,17 @@ const MyApplications: React.FC = () => {
     }
     loadApplications()
   }, [])
+  const handleCheckApplication = (referenceNumber: string) => {
+    // Extract numeric part from reference (e.g., "PP-2025-010001" -> "10001")
+    const numericRef = referenceNumber.split('-').pop() || referenceNumber;
+    setSelectedApplicationRef(numericRef);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false)
+    setSelectedApplicationRef('')
+  }
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -180,26 +193,38 @@ const MyApplications: React.FC = () => {
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   {application.description}
                 </Typography>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
                     Location: {application.address}
                   </Typography>
-                  <Button
-                    component={Link}
-                    to={`/application/${application.id}`}
-                    variant="contained"
-                    startIcon={<Visibility />}
-                    size="small"
-                  >
-                    View Details
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      component={Link}
+                      to={`/application/${application.id}`}
+                      variant="contained"
+                      startIcon={<Visibility />}
+                      size="small"
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Visibility />}
+                      onClick={() => handleCheckApplication(application.referenceNumber)}
+                      size="small"
+                      sx={{ 
+                        borderColor: '#4CAF50',
+                        color: '#2E7D32',
+                        '&:hover': {
+                          borderColor: '#2E7D32',
+                          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        },
+                      }}
+                    >
+                      Check My Application
+                    </Button>
+                  </Box>
                 </Box>
-
-                {/* Check My Application Button - only show for application 10001 */}
-                {application.referenceNumber === 'PP-2025-010001' && (
-                  <ApplicationChatbot applicationRef={application.referenceNumber} />
-                )}
               </CardContent>
             </Card>
           </Grid>
@@ -218,9 +243,13 @@ const MyApplications: React.FC = () => {
             Submit Your First Application
           </Button>
         </Paper>
-        )}
-
-        <ChatbotLauncher />
+        )}        <ChatbotLauncher />
+        
+        <ApplicationStatusModal 
+          open={modalOpen}
+          onClose={handleCloseModal}
+          applicationRef={selectedApplicationRef}
+        />
       </Container>
     </Box>
   )
