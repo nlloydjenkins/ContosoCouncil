@@ -27,6 +27,17 @@ export interface ConversationInfo {
 
 const DIRECT_LINE_SECRET = import.meta.env.VITE_DIRECTLINE_SECRET;
 const DIRECT_LINE_BASE_URL = 'https://directline.botframework.com/v3/directline';
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
+
+// Helper function to get trusted origins for current environment
+const getTrustedOrigins = (): string[] => {
+  return [
+    'https://web.powerva.microsoft.com',
+    BASE_URL, // Current environment URL (localhost:3000 or production)
+    'http://localhost:3000', // Always include dev URL for convenience
+    'https://thankful-sea-03a16bc03.6.azurestaticapps.net' // Always include production URL
+  ];
+};
 
 // Azure AD Configuration - using environment variables for security
 const TENANT_ID = import.meta.env.VITE_AZURE_TENANT_ID;
@@ -318,7 +329,7 @@ export class DirectLineService {
             Id: 'authenticated-user',
             Name: 'Contoso Council User'
           },
-          TrustedOrigins: ['https://web.powerva.microsoft.com', 'http://localhost:3001']
+          TrustedOrigins: getTrustedOrigins()
         })
       });
 

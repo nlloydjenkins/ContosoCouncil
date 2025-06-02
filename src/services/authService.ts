@@ -7,16 +7,17 @@ import {
 } from '@azure/msal-browser';
 
 // Azure AD Configuration from the Python script
-const TENANT_ID = 'de6b5354-c00a-4c06-888c-81936c42d6f2';
-const CLIENT_ID = 'a607a4c4-5bf6-4c90-b30a-b495cd30e97d';
+const TENANT_ID = import.meta.env.VITE_AZURE_TENANT_ID;
+const CLIENT_ID = import.meta.env.VITE_AZURE_CLIENT_ID;
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
 // MSAL Configuration
 const msalConfig: Configuration = {
   auth: {
     clientId: CLIENT_ID,
     authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-    redirectUri: 'http://localhost:3001', // Match exactly with Azure AD registration
-    postLogoutRedirectUri: 'http://localhost:3001'
+    redirectUri: BASE_URL, // Use environment-specific URL
+    postLogoutRedirectUri: BASE_URL
   },
   cache: {
     cacheLocation: 'localStorage',
