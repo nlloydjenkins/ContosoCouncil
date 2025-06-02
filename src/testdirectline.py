@@ -2,7 +2,7 @@ import requests
 import time
 
 # === CONFIGURATION ===
-DIRECT_LINE_SECRET = '84pBUEFAqFLx0MKpELPqCyCcGNufWzr1W9mlX4g7EeO9PNaQOeJEJQQJ99BEACL93NaAArohAAABAZBS22tg.CnT01xrXKxz4bdZymZ3gBYQbWITCCYHybSdibYe5hWZcCYXmgcDTJQQJ99BFACYeBjFAArohAAABAZBS1oG5'  # Replace with your actual secret
+DIRECT_LINE_SECRET = ''  # Replace with your actual secret
 USER_ID = 'user1'
 MESSAGE_TEXT = 'I want to apply for planning permission'
 
