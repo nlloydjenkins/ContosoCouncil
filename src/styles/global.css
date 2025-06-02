@@ -91,8 +91,8 @@ body {
 }
 
 .council-header {
-  background: white; /* Set background to white */
-  color: black; /* Set text color to black */
+  background: #2E7D32 !important; /* Set background to green */
+  color: white !important; /* Set text color to white */
   position: relative;
   overflow: hidden;
   border-radius: 0 !important;

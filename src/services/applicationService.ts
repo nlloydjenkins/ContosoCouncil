@@ -83,8 +83,7 @@ const mockApplications: Application[] = [
     ],
     timeline: [
       {
-        id: '1',
-        title: 'Application Submitted',
+        id: '1',        title: 'Application Submitted',
         description: 'Your eco-friendly extension application has been received and assigned reference number PP-2025-010001',
         date: '2025-05-01',
         status: 'completed'
@@ -135,7 +134,7 @@ const mockApplications: Application[] = [
   },
   {
     id: '2',
-    referenceNumber: 'PP-2025-001234',
+    referenceNumber: 'PP-2025-010002',
     title: 'Single Storey Rear Extension',
     description: 'Proposed single storey rear extension to existing dwelling, extending 6m from the rear wall.',
     status: 'Under Review',
@@ -162,9 +161,8 @@ const mockApplications: Application[] = [
     ],
     timeline: [
       {
-        id: '1',
-        title: 'Application Submitted',
-        description: 'Your application has been received and assigned reference number PP-2025-001234',
+        id: '1',        title: 'Application Submitted',
+        description: 'Your application has been received and assigned reference number PP-2025-010002',
         date: '2025-05-15',
         status: 'completed'
       },
@@ -190,10 +188,9 @@ const mockApplications: Application[] = [
         status: 'pending'
       }
     ]
-  },
-  {
+  },  {
     id: '3',
-    referenceNumber: 'PP-2025-000987',
+    referenceNumber: 'PP-2025-010003',
     title: 'Loft Conversion',
     description: 'Conversion of existing loft space to habitable room with dormer window.',
     status: 'Approved',
@@ -212,9 +209,8 @@ const mockApplications: Application[] = [
     ],
     timeline: [
       {
-        id: '5',
-        title: 'Application Submitted',
-        description: 'Your application has been received and assigned reference number PP-2025-000987',
+        id: '5',        title: 'Application Submitted',
+        description: 'Your application has been received and assigned reference number PP-2025-010003',
         date: '2025-04-01',
         status: 'completed'
       },
@@ -240,10 +236,9 @@ const mockApplications: Application[] = [
         status: 'completed'
       }
     ]
-  },
-  {
+  },  {
     id: '4',
-    referenceNumber: 'PP-2025-001456',
+    referenceNumber: 'PP-2025-010004',
     title: 'Garden Shed',
     description: 'Construction of detached garden shed for storage purposes.',
     status: 'Pending',
@@ -262,9 +257,8 @@ const mockApplications: Application[] = [
     ],
     timeline: [
       {
-        id: '9',
-        title: 'Application Submitted',
-        description: 'Your application has been received and assigned reference number PP-2025-001456',
+        id: '9',        title: 'Application Submitted',
+        description: 'Your application has been received and assigned reference number PP-2025-010004',
         date: '2025-05-28',
         status: 'completed'
       },

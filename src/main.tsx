@@ -8,6 +8,9 @@ import theme from './styles/theme.ts'
 import { AppProvider } from './context/AppContext.tsx'
 import './styles/global.css'
 
+// Import DirectLine test for development
+import './services/directLineTest.ts'
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
