@@ -202,16 +202,18 @@ export class DirectLineService {
 
         if (!response.ok) {
           throw new Error(`Failed to get activities: ${response.statusText}`);
-        }
-
-        const data: DirectLineResponse = await response.json();
+        }        const data: DirectLineResponse = await response.json();
         const activities = data.activities || [];
 
         console.log(`Polling attempt ${attempt}/${maxAttempts}. Total activities: ${activities.length}`);
 
+        // Log the complete raw response for debugging
+        console.log('🔍 RAW DIRECTLINE RESPONSE:', JSON.stringify(data, null, 2));
+
         // Log all activities for debugging
         activities.forEach((activity, index) => {
-          console.log(`Activity ${index}:`, {
+          console.log(`📋 Activity ${index} RAW:`, JSON.stringify(activity, null, 2));
+          console.log(`📋 Activity ${index} SUMMARY:`, {
             type: activity.type,
             from: activity.from?.id,
             fromName: activity.from?.name,
@@ -284,12 +286,15 @@ export class DirectLineService {
           await new Promise(resolve => setTimeout(resolve, 4000));
         }
       }
-    }
-
-    console.log(`Polling completed. Found ${botMessages.length} bot messages:`, botMessages);
+    }    console.log(`Polling completed. Found ${botMessages.length} bot messages:`, botMessages);
     console.log('Permission request detected:', hasPermissionRequest);
     console.log('Suggested actions:', suggestedActions);
-    return { messages: botMessages, hasPermissionRequest, suggestedActions };
+    
+    // Log the final processed response
+    const finalResponse = { messages: botMessages, hasPermissionRequest, suggestedActions };
+    console.log('🎯 FINAL PROCESSED RESPONSE:', JSON.stringify(finalResponse, null, 2));
+    
+    return finalResponse;
   }  public static async sendMessageAndGetResponse(message: string): Promise<{messages: string[], hasPermissionRequest: boolean, suggestedActions: any[]}> {
     console.log('DirectLine: Starting conversation with message:', message);
     try {
