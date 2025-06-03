@@ -29,6 +29,18 @@ const DIRECT_LINE_SECRET = import.meta.env.VITE_DIRECTLINE_SECRET;
 const DIRECT_LINE_BASE_URL = 'https://directline.botframework.com/v3/directline';
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
+// Validate required environment variables
+const validateEnvironmentVariables = (): void => {
+  const missing = [];
+  if (!DIRECT_LINE_SECRET) missing.push('VITE_DIRECTLINE_SECRET');
+  if (!TENANT_ID) missing.push('VITE_AZURE_TENANT_ID');
+  if (!CLIENT_ID) missing.push('VITE_AZURE_CLIENT_ID');
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}. Please check your .env.local file for development or configure GitHub Actions secrets for production.`);
+  }
+};
+
 // Helper function to get trusted origins for current environment
 const getTrustedOrigins = (): string[] => {
   return [
@@ -430,22 +442,27 @@ export class DirectLineService {
       if (!messageResponse.ok) {
         const errorText = await messageResponse.text();
         throw new Error(`Failed to send authenticated message: ${messageResponse.statusText} - ${errorText}`);
-      }
-
-      console.log('DirectLine: Authenticated message sent');
+      }      console.log('DirectLine: Authenticated message sent');
 
       // Step 6: Poll for response
       const responses = await this.pollForResponse(conversationId, token, 'authenticated-user');
-      console.log('DirectLine: WebChat auth polling completed. Responses:', responses);      return responses;
+      console.log('DirectLine: WebChat auth polling completed. Responses:', responses);
+      
+      return responses;
     } catch (error) {
       console.error('DirectLine WebChat auth error:', error);
       throw error;
     }
-  }  // Bot Framework compatible authentication method
+  }
+
+  // Bot Framework compatible authentication method
   public static async sendMessageWithBotFrameworkAuth(message: string): Promise<{messages: string[], hasPermissionRequest: boolean, suggestedActions: any[]}> {
     console.log('DirectLine: Starting Bot Framework authentication flow...');
     
     try {
+      // Validate environment variables first
+      validateEnvironmentVariables();
+      
       // Step 1: Get user access token via popup with Bot Framework compatible scopes
       const authService = AuthService.getInstance();
       

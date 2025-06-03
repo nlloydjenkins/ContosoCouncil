@@ -52,36 +52,48 @@ The Contoso Council Planning Portal is a comprehensive digital platform that ena
 
 The application supports both development and production environments with automatic configuration.
 
-#### 1. Copy the environment template:
+#### 🔐 Security Note
+For security reasons, sensitive credentials are not stored in the repository. Instead:
+- **Production**: Secrets are configured as GitHub Actions secrets and injected during deployment
+- **Development**: Use `.env.local` file (never committed to Git)
+
+#### 1. For Local Development:
+Create a `.env.local` file in the project root with your development credentials:
 ```bash
-cp .env.example .env
+# Copy from .env.example and add your actual values
+cp .env.example .env.local
 ```
 
-#### 2. Configure your environment variables in `.env`:
+Edit `.env.local` with your actual development credentials:
 ```env
 # Azure AD Configuration
-VITE_AZURE_TENANT_ID=your_tenant_id_here
-VITE_AZURE_CLIENT_ID=your_client_id_here
-VITE_AZURE_CLIENT_SECRET=your_client_secret_here
+VITE_AZURE_TENANT_ID=your_actual_tenant_id
+VITE_AZURE_CLIENT_ID=your_actual_client_id
+VITE_AZURE_CLIENT_SECRET=your_actual_client_secret
 
 # DirectLine Configuration
-VITE_DIRECTLINE_SECRET=your_directline_secret_here
+VITE_DIRECTLINE_SECRET=your_actual_directline_secret
 
 # Application Configuration
-# For development: http://localhost:3000
-# For production: https://thankful-sea-03a16bc03.6.azurestaticapps.net
 VITE_APP_BASE_URL=http://localhost:3000
 ```
+
+#### 2. For Production:
+Configure the following as GitHub Actions secrets in your repository:
+- `VITE_AZURE_TENANT_ID`
+- `VITE_AZURE_CLIENT_ID`
+- `VITE_AZURE_CLIENT_SECRET`
+- `VITE_DIRECTLINE_SECRET`
 
 #### Environment-Specific Configuration:
 
 **Development (localhost:3000):**
-- Uses `.env.development` for base URL
+- Uses `.env.local` for sensitive values
 - Automatically configured for local development
 - Run with: `npm run dev`
 
 **Production (Azure Static Web Apps):**
-- Uses `.env.production` for base URL  
+- Uses GitHub Actions secrets injected during build
 - Automatically configured for: `https://thankful-sea-03a16bc03.6.azurestaticapps.net`
 - Build with: `npm run build:prod`
 
