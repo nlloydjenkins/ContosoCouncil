@@ -32,7 +32,7 @@ export interface TimelineEvent {
 const mockApplications: Application[] = [
   {
     id: '1',
-    referenceNumber: 'PP-2025-010001',
+    referenceNumber: 'PP-2025-10001',
     title: 'Two Storey Side Extension with Solar Panels',
     description: 'Proposed two storey side extension to existing dwelling with eco-friendly solar panel installation and rainwater harvesting system.',
     status: 'Under Review',
@@ -84,7 +84,7 @@ const mockApplications: Application[] = [
     timeline: [
       {
         id: '1',        title: 'Application Submitted',
-        description: 'Your eco-friendly extension application has been received and assigned reference number PP-2025-010001',
+        description: 'Your eco-friendly extension application has been received and assigned reference number 10001',
         date: '2025-05-01',
         status: 'completed'
       },
@@ -134,7 +134,7 @@ const mockApplications: Application[] = [
   },
   {
     id: '2',
-    referenceNumber: 'PP-2025-010002',
+    referenceNumber: 'PP-2025-10002',
     title: 'Single Storey Rear Extension',
     description: 'Proposed single storey rear extension to existing dwelling, extending 6m from the rear wall.',
     status: 'Under Review',

@@ -63,7 +63,7 @@ const ApplicationChatbot: React.FC<ApplicationChatbotProps> = ({ applicationRef 
         <DialogContent sx={{ p: 0, height: '100%' }}>
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <iframe
-              src={`https://web.powerva.microsoft.com/environments/Default-d86b20c3-c3ec-43b3-8500-84e235e3b94c/bots/cr94b_contosoCouncilChatbot/webchat?__version__=2&applicationRef=${applicationRef || 'PP-2025-010001'}`}
+              src={`https://web.powerva.microsoft.com/environments/Default-d86b20c3-c3ec-43b3-8500-84e235e3b94c/bots/cr94b_contosoCouncilChatbot/webchat?__version__=2&applicationRef=${applicationRef || '10001'}`}
               style={{
                 width: '100%',
                 height: '100%',

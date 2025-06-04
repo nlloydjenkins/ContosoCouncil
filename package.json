@@ -8,7 +8,8 @@
     "build:dev": "tsc && vite build --mode development",
     "build:prod": "tsc && vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate-env": "node validate-env.js"
   },
   "dependencies": {
     "@azure/msal-browser": "^4.13.0",

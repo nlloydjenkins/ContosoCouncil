@@ -140,6 +140,7 @@ const Home: React.FC = () => {
                   fontWeight: 600,
                   '&:hover': {
                     bgcolor: '#F1F8E9',
+                    color: '#1B5E20',
                     transform: 'translateY(-2px)',
                   },
                   boxShadow: '0 4px 15px rgba(0,0,0,0.2)',

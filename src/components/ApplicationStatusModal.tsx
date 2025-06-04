@@ -68,6 +68,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
   const [tabValue, setTabValue] = useState(0);
   const [progressMessage, setProgressMessage] = useState<string>('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [agentPrompt, setAgentPrompt] = useState<string>('');
 
   // Interface for document status
   interface DocumentItem {
@@ -621,14 +622,15 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       const line = lines[i].trim();
       
       // Check if we're entering the DOCUMENT TEMPLATES section
-      if (line === 'DOCUMENT TEMPLATES' || line.startsWith('DOCUMENT TEMPLATES')) {
+      if (line.match(/^##?\s*DOCUMENT TEMPLATES/i) || line === 'DOCUMENT TEMPLATES' || line.startsWith('DOCUMENT TEMPLATES')) {
         inTemplatesSection = true;
         continue;
       }
       
       // Exit if we hit another section
       if (inTemplatesSection && 
-          ((line.match(/^[A-Z\s]+$/) && line.length > 10) || 
+          ((line.match(/^##?\s*[A-Z\s]+$/) && line.length > 10) || 
+           (line.match(/^[A-Z\s]+$/) && line.length > 10) ||
            line.startsWith('--') && line.length > 10)) {
         break;
       }
@@ -638,7 +640,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       // Skip empty lines
       if (line === '') continue;
       
-      // Look for numbered list items with .txt files
+      // Look for numbered list items with .txt files (new format: "1. Design_and_Access_Statement.txt")
       const templateMatch = line.match(/^\d+\.\s*([A-Za-z0-9_]+\.txt)$/i);
       if (templateMatch) {
         const filename = templateMatch[1];
@@ -654,6 +656,21 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
           name,
           filename
         });
+      } else {
+        // Look for numbered list items with "SAMPLE DOCUMENT:" format (legacy support)
+        const sampleDocMatch = line.match(/^\d+\.\s*SAMPLE DOCUMENT:\s*(.+)$/i);
+        if (sampleDocMatch) {
+          let name = sampleDocMatch[1].trim();
+          // Remove any remaining "SAMPLE DOCUMENT" text if it somehow appears
+          name = name.replace(/SAMPLE DOCUMENT:?\s*/gi, '').trim();
+          // Create filename by converting name to lowercase, replacing spaces with underscores, and adding .txt
+          const filename = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '.txt';
+          
+          templates.push({
+            name,
+            filename
+          });
+        }
       }
     }
     
@@ -740,6 +757,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
 
     try {
       const prompt = `check planning application ${applicationRef}`;
+      setAgentPrompt(prompt); // Store the prompt in state
       console.log('Modal: Starting DirectLine request with popup auth, prompt:', prompt);
 
       setProgressMessage('Connecting to planning assistant...');
@@ -896,10 +914,10 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
         }}
       >
         <Box>
-          <Typography variant="h6" component="div">
-            🏡 Application Status Check
+          <Typography variant="h6" component="div" sx={{ color: 'white', fontSize: '1.2em' }}>
+            Application Status Check
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5, color: 'white', fontSize: '1.2em' }}>
             Reference: {applicationRef}
           </Typography>
         </Box>
@@ -1093,9 +1111,9 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
                     }
                   }}
                 >                  <Tab label="Overview" />
-                  <Tab label="Raw Output" />
                   <Tab label="How to Fix" />
                   <Tab label="Template Library" />
+                  <Tab label="Raw Output" />
                 </Tabs>
               </Box>
 
@@ -1259,8 +1277,34 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
               )}
 
               {/* Raw Output Tab */}
-              {tabValue === 1 && (
+              {tabValue === 3 && (
                 <Box sx={{ flex: 1, overflow: 'auto' }}>
+                  {/* Prompt Section */}
+                  <Box sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                        Agent Prompt
+                      </Typography>
+                    </Box>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        bgcolor: '#f9f9f9',
+                        fontFamily: 'monospace',
+                        fontSize: '0.875rem',
+                        whiteSpace: 'pre-wrap',
+                        overflowWrap: 'break-word',
+                        mb: 3,
+                      }}
+                    >
+                      {agentPrompt || `check planning application ${applicationRef}`}
+                    </Paper>
+                  </Box>
+
+                  {/* Response Section */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       CPS Agent Raw Response
@@ -1295,7 +1339,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
                   </Paper>
                 </Box>              )}              
               {/* How to Fix Tab */}
-              {tabValue === 2 && (
+              {tabValue === 1 && (
                 <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
                   {/* Main Title with Icon */}
                   <Box 
@@ -1310,173 +1354,143 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
                       boxShadow: '0 4px 20px rgba(33, 150, 243, 0.25)'
                     }}
                   >
-                    <Info sx={{ mr: 2, color: 'white', fontSize: 32 }} />                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
-                      Documents Requiring Attention
+                    <Info sx={{ mr: 2, color: 'white', fontSize: 32 }} />
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
+                      How to Fix
                     </Typography>
                   </Box>
                   
-                  {(() => {
-                    const rawOutput = response.join('\n');
-                    const fixSections = parseHowToFixSection(rawOutput);
-                    
-                    if (fixSections.length > 0) {
-                      return (
-                        <Grid container spacing={3}>
-                          {fixSections.map((section, index) => (
-                            <Grid item xs={12} key={index}>
-                              <Card 
-                                sx={{ 
-                                  mb: 3,
-                                  borderRadius: 2,
-                                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                                  overflow: 'visible',
-                                  position: 'relative',
-                                  '&:hover': {
-                                    boxShadow: '0 12px 28px rgba(0,0,0,0.2)',
-                                    transform: 'translateY(-4px)',
-                                    transition: 'all 0.3s ease'
-                                  }
-                                }}
-                              >
-                                {/* Document icon badge */}
-                                <Box
-                                  sx={{
-                                    position: 'absolute',
-                                    top: -16,
-                                    left: 20,
-                                    width: 60,
-                                    height: 60,
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    backgroundColor: '#3f51b5',
-                                    boxShadow: '0 4px 14px rgba(63, 81, 181, 0.4)',
-                                    zIndex: 1,
-                                    border: '3px solid white'
+                  {/* Simple text content */}
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      bgcolor: '#fafafa',
+                    }}
+                  >
+                    {(() => {
+                      const rawOutput = response.join('\n');
+                      
+                      // Extract the "How to Fix" section content
+                      const lines = rawOutput.split('\n');
+                      let howToFixContent = '';
+                      let inHowToFixSection = false;
+                      
+                      for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        
+                        // Check if we're entering the "How to Fix" section
+                        if (line.match(/^##?\s*HOW TO FIX/i) || line.match(/^How to Fix/i)) {
+                          inHowToFixSection = true;
+                          continue; // Skip the header line
+                        }
+                        
+                        // Exit if we hit the DOCUMENT TEMPLATES section
+                        if (inHowToFixSection && line.match(/^##?\s*DOCUMENT TEMPLATES/i)) {
+                          break;
+                        }
+                        
+                        // Add all content while in the section
+                        if (inHowToFixSection) {
+                          howToFixContent += lines[i] + '\n'; // Keep original line with formatting
+                        }
+                      }
+                      
+                      // Convert markdown to HTML
+                      const convertMarkdownToHtml = (text: string): string => {
+                        return text
+                          // Bold text **text** or __text__
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/__(.*?)__/g, '<strong>$1</strong>')
+                          // Italic text *text* or _text_
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          .replace(/_(.*?)_/g, '<em>$1</em>')
+                          // Code `code`
+                          .replace(/`(.*?)`/g, '<code>$1</code>')
+                          // Links [text](url)
+                          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                          // Headers ### text
+                          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                          // Bullet points - item or * item
+                          .replace(/^[\s]*[-*]\s+(.*)$/gm, '<li>$1</li>')
+                          // Numbered lists 1. item
+                          .replace(/^[\s]*\d+\.\s+(.*)$/gm, '<li>$1</li>');
+                      };
+                      
+                      // Split content into sections and process
+                      const sections = howToFixContent.split('\n\n').filter(section => section.trim());
+                      
+                      return sections.length > 0 ? (
+                        <Box>
+                          {sections.map((section, index) => {
+                            const htmlContent = convertMarkdownToHtml(section.trim());
+                            
+                            // Check if this section contains list items
+                            if (htmlContent.includes('<li>')) {
+                              // Wrap list items in ul tags
+                              const wrappedContent = htmlContent.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+                              return (
+                                <Box 
+                                  key={index}
+                                  sx={{ mb: 2 }}
+                                  dangerouslySetInnerHTML={{ __html: wrappedContent }}
+                                />
+                              );
+                            } else {
+                              // Regular paragraph content
+                              return (
+                                <Typography 
+                                  key={index}
+                                  variant="body1" 
+                                  sx={{ 
+                                    mb: 2,
+                                    lineHeight: 1.6,
+                                    color: 'text.primary',
+                                    '& strong': { fontWeight: 'bold' },
+                                    '& em': { fontStyle: 'italic' },
+                                    '& code': { 
+                                      bgcolor: '#f5f5f5', 
+                                      padding: '2px 4px', 
+                                      borderRadius: '3px',
+                                      fontFamily: 'monospace'
+                                    },
+                                    '& a': { 
+                                      color: '#1976d2', 
+                                      textDecoration: 'none',
+                                      '&:hover': { textDecoration: 'underline' }
+                                    },
+                                    '& h1, & h2, & h3': { 
+                                      fontWeight: 'bold',
+                                      margin: '16px 0 8px 0'
+                                    }
                                   }}
-                                >
-                                  <Description sx={{ fontSize: 32, color: 'white' }} />
-                                </Box>
-                                
-                                {/* Colored header with file name */}                                <Box
-                                  sx={{
-                                    p: 2,
-                                    pl: 15, // Increased from 9 to 15 (approximately 50px more)
-                                    background: 'linear-gradient(145deg, #3f51b5 0%, #303f9f 100%)',
-                                    color: 'white',
-                                    borderTopLeftRadius: 8,
-                                    borderTopRightRadius: 8,
-                                  }}
-                                >                                  <Typography 
-                                    variant="h5" 
-                                    sx={{ 
-                                      fontWeight: 600,
-                                      color: 'white',
-                                      textShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                                    }}
-                                  >
-                                    {section.title.includes('.txt') 
-                                      ? section.title.replace(/#/g, '') 
-                                      : `${section.title.replace(/#/g, '')}.txt`}
-                                  </Typography>
-                                </Box>
-                                
-                                <CardContent sx={{ p: 4, pt: 3 }}>
-                                  <Typography variant="subtitle1" sx={{ mb: 3, color: '#555', fontWeight: 500 }}>
-                                    Missing fields to complete:
-                                  </Typography>
-                                  
-                                  {section.items.map((item, itemIndex) => (
-                                    <Box 
-                                      key={itemIndex} 
-                                      sx={{ 
-                                        mb: 2,
-                                        display: 'flex',
-                                        alignItems: 'flex-start',
-                                        p: 2,
-                                        borderRadius: 1,
-                                        backgroundColor: itemIndex % 2 === 0 ? '#f5f8ff' : '#fff',
-                                        border: '1px solid',
-                                        borderColor: itemIndex % 2 === 0 ? '#e8eaf6' : '#eceff1',
-                                      }}
-                                    >
-                                      <Box 
-                                        sx={{ 
-                                          minWidth: 36, 
-                                          height: 36, 
-                                          borderRadius: '50%', 
-                                          backgroundColor: '#e3f2fd',
-                                          display: 'flex',
-                                          justifyContent: 'center',
-                                          alignItems: 'center',
-                                          mr: 2 
-                                        }}
-                                      >
-                                        <Typography sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                                          {itemIndex + 1}
-                                        </Typography>
-                                      </Box>
-                                      <Typography 
-                                        variant="body1" 
-                                        sx={{ 
-                                          lineHeight: 1.6,
-                                          color: 'text.primary',
-                                          flex: 1,
-                                          pt: 0.5
-                                        }}
-                                      >
-                                        {item}
-                                      </Typography>
-                                    </Box>
-                                  ))}
-                                </CardContent>
-                              </Card>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      );
-                    } else {
-                      return (
-                        <Card 
+                                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                                />
+                              );
+                            }
+                          })}
+                        </Box>
+                      ) : (
+                        <Typography 
+                          variant="body1" 
                           sx={{ 
-                            borderRadius: 3,
-                            backgroundColor: '#f5f9ff',
-                            textAlign: 'center',
-                            p: 5,
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                            color: 'text.secondary',
+                            fontStyle: 'italic',
+                            textAlign: 'center'
                           }}
                         >
-                          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-                            <Info sx={{ fontSize: 64, color: '#bbdefb' }} />
-                          </Box>
-                          <Typography 
-                            variant="h5" 
-                            sx={{ 
-                              color: '#1976d2',
-                              mb: 2,
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            No specific guidance available
-                          </Typography>
-                          <Typography 
-                            variant="body1" 
-                            sx={{ 
-                              color: 'text.secondary',
-                              maxWidth: 600,
-                              mx: 'auto'
-                            }}
-                          >
-                            The system will provide detailed step-by-step guidance once your application has been analyzed.
-                          </Typography>
-                        </Card>
+                          No guidance available at this time.
+                        </Typography>
                       );
-                    }
-                  })()}
+                    })()}
+                  </Paper>
                 </Box>
               )}              {/* Document Templates Tab */}
-              {tabValue === 3 && (
+              {tabValue === 2 && (
                 <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
                   {/* Title section with icon */}
                   <Box 
@@ -1548,7 +1562,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
                                     mr: 2
                                   }}
                                 >
-                                  <Typography variant="h6">{index + 1}</Typography>
+                                  <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>{index + 1}</Typography>
                                 </Box>
                                 <Box>
                                   <Typography 
