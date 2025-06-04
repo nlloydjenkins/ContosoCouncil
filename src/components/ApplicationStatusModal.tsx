@@ -10,12 +10,6 @@ import {
   Paper,
   Alert,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
   Grid,
   Card,
@@ -34,13 +28,7 @@ import {
   Error as ErrorIcon,
   Warning,
   Description,
-  LocationOn,
   Home,
-  Architecture,
-  Engineering,
-  Nature,
-  Water,
-  AccountBalance,
   Assignment,
   Info,
   ContentCopy,
@@ -78,137 +66,204 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
     details?: string[];
     missingFields?: string[];
   }
+  // Helper function to extract guidance for a specific document
+  const extractGuidance = (docName: string, responseText: string) => {
+    console.log(`Extracting guidance for: "${docName}"`);
+    console.log(`Response text length: ${responseText.length}`);
 
-  // Interface for fix section
-  interface FixSection {
-    title: string;
-    items: string[];
-  }
+    // Try numbered list format with bold text first
+    const numberedRegex = new RegExp(
+      `\\d+\\. \\*\\*${docName}\\*\\*([\\s\\S]*?)(?=\\d+\\. \\*\\*|You can find|$)`,
+      'i'
+    );
+    const numberedMatch = responseText.match(numberedRegex);
 
-  // Parse the bot response to extract structured data
-  const parseApplicationData = (responseText: string) => {
-    // Helper function to extract guidance for a specific document
-    const extractGuidance = (docName: string, responseText: string) => {
-      console.log(`Extracting guidance for: "${docName}"`);
-      console.log(`Response text length: ${responseText.length}`);
-
-      // Try numbered list format with bold text first
-      const numberedRegex = new RegExp(
-        `\\d+\\. \\*\\*${docName}\\*\\*([\\s\\S]*?)(?=\\d+\\. \\*\\*|You can find|$)`,
-        'i'
-      );
-      const numberedMatch = responseText.match(numberedRegex);
-
-      if (numberedMatch) {
-        console.log(`Found match for "${docName}" in numbered list format`);
-        const content = numberedMatch[1];
-        console.log(`Content for "${docName}":`, content);
-        const items: string[] = [];
-
-        // Extract bullet points with their details (numbered list format)
-        const bulletRegex = /- \*\*(.*?)\*\*:\s*(.*?)(?=\n\s*- \*\*|\n\d+\. \*\*|\n\n|$)/gs;
-        let bulletMatch;
-        while ((bulletMatch = bulletRegex.exec(content)) !== null) {
-          const title = bulletMatch[1].trim();
-          const description = bulletMatch[2].replace(/\n/g, ' ').trim();
-          items.push(`${title}: ${description}`);
-        }
-        console.log(
-          `Extracted ${items.length} items from numbered list format:`,
-          items
-        );
-        return items;
-      }
-
-      // Try new format (indented bullet points)
-      const sectionRegex = new RegExp(
-        `${docName}\\s*\\n([\\s\\S]*?)(?=\\n\\s{4}[A-Z]|\\n[A-Z]|$)`,
-        'i'
-      );
-      const match = responseText.match(sectionRegex);
-
-      if (!match) {
-        console.log(`No match found for "${docName}" in new format`);
-        // Fallback to old format
-        const oldSectionRegex = new RegExp(
-          `### ${docName}\\s*([\\s\\S]*?)(?=### |$)`,
-          'i'
-        );
-        const oldMatch = responseText.match(oldSectionRegex);
-        if (oldMatch) {
-          console.log(`Found match for "${docName}" in old format`);
-          const content = oldMatch[1];
-          const items: string[] = [];
-
-          // Extract bullet points with their details (old format)
-          const bulletRegex = /- \*\*(.*?)\*\*:\s*(.*?)(?=\n- \*\*|\n###|\n\n|$)/gs;
-          let bulletMatch;
-          while ((bulletMatch = bulletRegex.exec(content)) !== null) {
-            const title = bulletMatch[1].trim();
-            const description = bulletMatch[2].replace(/\n/g, ' ').trim();
-            items.push(`${title}: ${description}`);
-          }
-          console.log(`Extracted ${items.length} items from old format:`, items);
-          return items;
-        }
-        console.log(`No match found for "${docName}" in any format`);
-        return [];
-      }
-
-      console.log(`Found match for "${docName}" in new format`);
-      const content = match[1];
+    if (numberedMatch) {
+      console.log(`Found match for "${docName}" in numbered list format`);
+      const content = numberedMatch[1];
       console.log(`Content for "${docName}":`, content);
       const items: string[] = [];
 
-      // Extract indented bullet points with their details
-      const bulletRegex = /^\s{8}([^:]+):\s*(.*?)(?=\n\s{8}|\n\s{4}|\n[A-Z]|\n\nYou can find|$)/gms;
+      // Extract bullet points with their details (numbered list format)
+      const bulletRegex = /- \*\*(.*?)\*\*:\s*(.*?)(?=\n\s*- \*\*|\n\d+\. \*\*|\n\n|$)/gs;
       let bulletMatch;
       while ((bulletMatch = bulletRegex.exec(content)) !== null) {
         const title = bulletMatch[1].trim();
         const description = bulletMatch[2].replace(/\n/g, ' ').trim();
         items.push(`${title}: ${description}`);
       }
-      console.log(`Extracted ${items.length} items from new format:`, items);
+      console.log(
+        `Extracted ${items.length} items from numbered list format:`,
+        items
+      );
       return items;
-    };
+    }
 
-    const documents: DocumentItem[] = [
-      {
+    // Try new format (indented bullet points)
+    const sectionRegex = new RegExp(
+      `${docName}\\s*\\n([\\s\\S]*?)(?=\\n\\s{4}[A-Z]|\\n[A-Z]|$)`,
+      'i'
+    );
+    const match = responseText.match(sectionRegex);
+
+    if (!match) {
+      console.log(`No match found for "${docName}" in new format`);
+      // Fallback to old format
+      const oldSectionRegex = new RegExp(
+        `### ${docName}\\s*([\\s\\S]*?)(?=### |$)`,
+        'i'
+      );
+      const oldMatch = responseText.match(oldSectionRegex);
+      if (oldMatch) {
+        console.log(`Found match for "${docName}" in old format`);
+        const content = oldMatch[1];
+        const items: string[] = [];
+
+        // Extract bullet points with their details (old format)
+        const bulletRegex = /- \*\*(.*?)\*\*:\s*(.*?)(?=\n- \*\*|\n###|\n\n|$)/gs;
+        let bulletMatch;
+        while ((bulletMatch = bulletRegex.exec(content)) !== null) {
+          const title = bulletMatch[1].trim();
+          const description = bulletMatch[2].replace(/\n/g, ' ').trim();
+          items.push(`${title}: ${description}`);
+        }
+        console.log(`Extracted ${items.length} items from old format:`, items);
+        return items;
+      }
+      console.log(`No match found for "${docName}" in any format`);
+      return [];
+    }
+
+    console.log(`Found match for "${docName}" in new format`);
+    const content = match[1];
+    console.log(`Content for "${docName}":`, content);
+    const items: string[] = [];
+
+    // Extract indented bullet points with their details
+    const bulletRegex = /^\s{8}([^:]+):\s*(.*?)(?=\n\s{8}|\n\s{4}|\n[A-Z]|\n\nYou can find|$)/gms;
+    let bulletMatch;
+    while ((bulletMatch = bulletRegex.exec(content)) !== null) {
+      const title = bulletMatch[1].trim();
+      const description = bulletMatch[2].replace(/\n/g, ' ').trim();
+      items.push(`${title}: ${description}`);
+    }
+    console.log(`Extracted ${items.length} items from new format:`, items);
+    return items;
+  };
+  // Parse the bot response to extract structured data
+  const parseApplicationData = (responseText: string) => {    // Extract missing documents from the structured MISSING DOCUMENTS section
+    const missingDocuments = new Set<string>();
+    
+    // Look for the MISSING DOCUMENTS section
+    const missingSection = responseText.match(/## MISSING DOCUMENTS\s*([\s\S]*?)(?=##|$)/i);
+    
+    if (missingSection) {
+      const missingContent = missingSection[1];
+      // Extract numbered list items (e.g., "1. Design_and_Access_Statement.txt")
+      const missingMatches = missingContent.match(/\d+\.\s*([A-Za-z0-9_]+\.txt)/g);
+      
+      if (missingMatches) {
+        missingMatches.forEach(match => {
+          const filename = match.replace(/\d+\.\s*/, '');
+          // Convert filename to document name for matching
+          const docName = filename
+            .replace(/\.txt$/, '')
+            .replace(/_/g, ' ')
+            .trim();
+          
+          // Add both the converted name and the original underscore version
+          missingDocuments.add(docName);
+          missingDocuments.add(filename.replace(/\.txt$/, ''));
+          
+          // Add specific mappings for known documents
+          if (filename.includes('Design_and_Access_Statement')) {
+            missingDocuments.add('Design and Access Statement');
+            missingDocuments.add('Design_and_Access_Statement');
+          }
+          if (filename.includes('Planning_Statement')) {
+            missingDocuments.add('Planning Statement');
+            missingDocuments.add('Planning_Statement');
+          }
+          if (filename.includes('Flood_Risk_Assessment')) {
+            missingDocuments.add('Flood Risk Assessment');
+            missingDocuments.add('Flood_Risk_Assessment');
+          }
+          if (filename.includes('Heritage_Statement')) {
+            missingDocuments.add('Heritage Statement');
+            missingDocuments.add('Heritage_Statement');
+          }
+          if (filename.includes('Tree_Survey') || filename.includes('Arboricultural_Report')) {
+            missingDocuments.add('Tree Survey or Arboricultural Report');
+            missingDocuments.add('Tree_Survey_or_Arboricultural_Report');
+            missingDocuments.add('Tree Survey');
+            missingDocuments.add('Arboricultural Report');
+          }
+          if (filename.includes('Biodiversity') || filename.includes('Ecology_Report')) {
+            missingDocuments.add('Biodiversity or Ecology Report');
+            missingDocuments.add('Biodiversity_or_Ecology_Report');
+            missingDocuments.add('Biodiversity');
+            missingDocuments.add('Ecology Report');
+          }
+        });
+      }
+    }
+    
+    // Fallback: if no structured section found, use the old logic
+    if (missingDocuments.size === 0) {
+      const missingPatterns = [
+        /missing[:\s]+([^.]+)/gi,
+        /not\s+found[:\s]+([^.]+)/gi,
+        /absent[:\s]+([^.]+)/gi,
+        /required[:\s]+([^.]+)/gi
+      ];
+      
+      missingPatterns.forEach(pattern => {
+        let match;
+        while ((match = pattern.exec(responseText)) !== null) {
+          const docName = match[1].trim();
+          const cleanName = docName
+            .replace(/\b(document|file|statement|report|form|plan|certificate)\b/gi, '')
+            .trim();
+          if (cleanName) {
+            missingDocuments.add(cleanName);
+          }
+        }
+      });
+    }
+
+    console.log('Detected missing documents:', Array.from(missingDocuments));
+
+    const documents: DocumentItem[] = [      {
         name: 'Application Form',
-        status: responseText.includes('Planning Application Form')
-          ? 'complete'
-          : 'missing',
-        icon: <Assignment />,
+        status: missingDocuments.has('Application Form') || missingDocuments.has('Application_Form') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Application Form') || missingDocuments.has('Application_Form') ? <ErrorIcon sx={{ color: '#F44336' }} /> : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('John Smith')
           ? [
-            'Applicant: John Smith',
-            'Site: 12 Garden Lane, Anytown, AT1 2CD',
-            'Description: Single-storey rear extension',
-            'Certificate A - Sole owner',
-          ]
+              'Applicant: John Smith',
+              'Site: 12 Garden Lane, Anytown, AT1 2CD',
+              'Description: Single-storey rear extension',
+              'Certificate A - Sole owner',
+            ]
           : undefined,
       },
       {
         name: 'Location Plan',
-        status: responseText.includes('Location Plan')
-          ? 'complete'
-          : 'missing',
-        icon: <LocationOn />,
+        status: missingDocuments.has('Location Plan') || missingDocuments.has('Location_Plan') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Location Plan') || missingDocuments.has('Location_Plan') ? <ErrorIcon sx={{ color: '#F44336' }} /> : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('Map Scale: 1:1250')
           ? [
-            'Scale: 1:1250',
-            'North Arrow: Present',
-            'Site outlined in red',
-            'Includes surrounding roads',
-          ]
+              'Scale: 1:1250',
+              'North Arrow: Present',
+              'Site outlined in red',
+              'Includes surrounding roads',
+            ]
           : undefined,
-      },
-      {
+      },      {
         name: 'Block/Site Plan',
-        status: responseText.includes('Block Plan')
-          ? 'complete'
-          : 'missing',
-        icon: <Architecture />,
+        status: missingDocuments.has('Block Plan') || missingDocuments.has('Site Plan') || missingDocuments.has('Block or Site Plan') || missingDocuments.has('Block_or_Site_Plan') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Block Plan') || missingDocuments.has('Site Plan') || missingDocuments.has('Block or Site Plan') || missingDocuments.has('Block_or_Site_Plan')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('Map Scale: 1:200')
           ? [
             'Scale: 1:200',
@@ -219,10 +274,10 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       },
       {
         name: 'Elevations',
-        status: responseText.includes('Elevations')
-          ? 'complete'
-          : 'missing',
-        icon: <Home />,
+        status: missingDocuments.has('Elevations') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Elevations')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('Scale: 1:100') && responseText.includes('Height')
           ? [
             'Scale: 1:100',
@@ -231,13 +286,12 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
             'Front, Rear, and Side elevations',
           ]
           : undefined,
-      },
-      {
+      },      {
         name: 'Floor Plans',
-        status: responseText.includes('Floor Plans')
-          ? 'complete'
-          : 'missing',
-        icon: <Engineering />,
+        status: missingDocuments.has('Floor Plans') || missingDocuments.has('Floor_Plans') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Floor Plans') || missingDocuments.has('Floor_Plans')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('Existing Layout')
           ? [
             'Scale: 1:100',
@@ -248,10 +302,10 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       },
       {
         name: 'Ownership Certificate',
-        status: responseText.includes('Ownership Certificate')
-          ? 'complete'
-          : 'missing',
-        icon: <AccountBalance />,
+        status: missingDocuments.has('Ownership Certificate') || missingDocuments.has('Ownership_Certificate') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Ownership Certificate') || missingDocuments.has('Ownership_Certificate')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('Certificate A')
           ? [
             'Certificate A: Sole owner',
@@ -262,10 +316,10 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       },
       {
         name: 'Agricultural Holdings Certificate',
-        status: responseText.includes('Agricultural Holdings Certificate')
-          ? 'complete'
-          : 'missing',
-        icon: <Nature />,
+        status: missingDocuments.has('Agricultural Holdings Certificate') || missingDocuments.has('Agricultural_Holdings_Certificate') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Agricultural Holdings Certificate') || missingDocuments.has('Agricultural_Holdings_Certificate')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('not part of an agricultural holding')
           ? [
             'Not part of agricultural holding',
@@ -276,10 +330,10 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       },
       {
         name: 'CIL Form 1',
-        status: responseText.includes('CIL Form 1')
-          ? 'complete'
-          : 'missing',
-        icon: <Description />,
+        status: missingDocuments.has('CIL Form 1') || missingDocuments.has('CIL_Form_1') || missingDocuments.has('CIL') ? 'missing' : 'complete',
+        icon: missingDocuments.has('CIL Form 1') || missingDocuments.has('CIL_Form_1') || missingDocuments.has('CIL')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         details: responseText.includes('Planning Application No: 10001')
           ? [
             'Application No: 10001',
@@ -291,60 +345,60 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       },
       {
         name: 'Design and Access Statement',
-        status: responseText.includes('Design and Access Statement') && responseText.includes('missing')
-          ? 'missing'
-          : 'complete',
-        icon: <Info />,
+        status: missingDocuments.has('Design and Access Statement') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Design and Access Statement')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         missingFields: extractGuidance('Design and Access Statement', responseText).length > 0
           ? extractGuidance('Design and Access Statement', responseText)
           : ['Design Rationale', 'Materials and Appearance', 'Accessibility (if relevant)'],
       },
       {
         name: 'Planning Statement',
-        status: responseText.includes('Planning Statement') && responseText.includes('missing')
-          ? 'missing'
-          : 'complete',
-        icon: <Description />,
+        status: missingDocuments.has('Planning Statement') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Planning Statement')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         missingFields: extractGuidance('Planning Statement', responseText).length > 0
           ? extractGuidance('Planning Statement', responseText)
           : ['Summary of Proposed Works', 'Compliance with Local Policies'],
       },
       {
         name: 'Flood Risk Assessment',
-        status: responseText.includes('Flood Risk Assessment') && responseText.includes('missing')
-          ? 'missing'
-          : 'complete',
-        icon: <Water />,
+        status: missingDocuments.has('Flood Risk Assessment') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Flood Risk Assessment')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         missingFields: extractGuidance('Flood Risk Assessment', responseText).length > 0
           ? extractGuidance('Flood Risk Assessment', responseText)
           : ['Flood Zone Identification', 'Mitigation Measures', 'Surface Water Drainage Plan'],
       },
       {
         name: 'Heritage Statement',
-        status: responseText.includes('Heritage Statement') && responseText.includes('missing')
-          ? 'missing'
-          : 'complete',
-        icon: <AccountBalance />,
+        status: missingDocuments.has('Heritage Statement') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Heritage Statement')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         missingFields: extractGuidance('Heritage Statement', responseText).length > 0
           ? extractGuidance('Heritage Statement', responseText)
           : ['Description of Heritage Asset', 'Impact of Proposal', 'Justification for Works'],
       },
       {
         name: 'Tree Survey or Arboricultural Report',
-        status: responseText.includes('Tree Survey') && responseText.includes('missing')
-          ? 'missing'
-          : 'complete',
-        icon: <Nature />,
+        status: missingDocuments.has('Tree Survey') || missingDocuments.has('Arboricultural Report') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Tree Survey') || missingDocuments.has('Arboricultural Report')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         missingFields: extractGuidance('Tree Survey or Arboricultural Report', responseText).length > 0
           ? extractGuidance('Tree Survey or Arboricultural Report', responseText)
           : ['Tree Locations and Species', 'Root Protection Areas', 'Impact of Proposed Work'],
       },
       {
         name: 'Biodiversity or Ecology Report',
-        status: responseText.includes('Biodiversity') && responseText.includes('missing')
-          ? 'missing'
-          : 'complete',
-        icon: <Nature />,
+        status: missingDocuments.has('Biodiversity') || missingDocuments.has('Ecology Report') ? 'missing' : 'complete',
+        icon: missingDocuments.has('Biodiversity') || missingDocuments.has('Ecology Report')
+          ? <ErrorIcon sx={{ color: '#F44336' }} />
+          : <CheckCircle sx={{ color: '#4CAF50' }} />,
         missingFields: extractGuidance('Biodiversity or Ecology Report', responseText).length > 0
           ? extractGuidance('Biodiversity or Ecology Report', responseText)
           : ['Habitat Impact', 'Protected Species', 'Mitigation Plans'],
@@ -353,200 +407,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
 
     return documents;
   };  // Parse the "How to Fix" section from agent output
-  const parseHowToFixSection = (agentOutput: string): FixSection[] => {
-    const lines = agentOutput.split('\n');
-    const fixSections: FixSection[] = [];
-    
-    // Enhanced interface for file sections
-    interface FileSection {
-      fileName: string;
-      fields: string[];
-      isMissing: boolean; // Flag to indicate if document is completely missing
-    }
-    
-    let inHowToFixSection = false;
-    let fileSections: FileSection[] = [];
-    let currentFileSection: FileSection | null = null;
-
-    // Look for specific section headers
-    const howToFixHeaders = [
-      'HOW TO FIX', 
-      'GUIDANCE', 
-      'RECOMMENDATIONS', 
-      'NEXT STEPS',
-      'REQUIRED ACTIONS',
-      'ACTION REQUIRED',
-      'FIX REQUIRED'
-    ];
-    
-    // Helper function to clean up markdown and formatting
-    const cleanMarkdown = (text: string): string => {
-      return text
-        .replace(/\*\*/g, '') // Remove bold markdown **text**
-        .replace(/\*/g, '')    // Remove italic markdown *text*
-        .replace(/`/g, '')     // Remove code markdown `text`
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace [text](url) with just text
-        .replace(/^[-•*]\s*/, '') // Remove bullet points at the start
-        .replace(/^>\s*/, '')  // Remove blockquote formatting
-        .replace(/#/g, '')     // Remove all # characters
-        .replace(/\\_/g, '_')  // Fix escaped underscores
-        .replace(/\\`/g, '`')  // Fix escaped backticks
-        .trim();
-    };
-
-    // Parse missing fields to identify documents with issues
-    const missingFields = parseMissingFields(agentOutput);
-    const missingDocuments = new Set(missingFields.map(field => field.filename.toLowerCase()));
-    
-    // First identify the "How to Fix" section
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmedLine = line.trim();
-      
-      // Check if we're entering a "How to Fix" or guidance section
-      const isHeader = howToFixHeaders.some(header => 
-        trimmedLine.toUpperCase().includes(header)
-      );
-      
-      if (isHeader) {
-        inHowToFixSection = true;
-        continue;
-      }
-
-      if (!inHowToFixSection) continue;
-
-      // Stop parsing if we hit another major section
-      if (inHowToFixSection && (
-        trimmedLine.includes('MISSING FIELDS') ||
-        trimmedLine.includes('DOCUMENT TEMPLATES') ||
-        (trimmedLine.match(/^[A-Z\s]+$/) && trimmedLine.length > 15)
-      )) {
-        break;
-      }
-      
-      // Skip empty lines and separator lines
-      if (trimmedLine === '' || /^[-=*#]+$/.test(trimmedLine)) {
-        continue;
-      }
-      
-      // Check if this line is a .txt file reference
-      const fileMatch = trimmedLine.match(/(.+\.txt)/i);
-      // Also check for file names that might be wrapped in code or bold markdown
-      const markdownFileMatch = trimmedLine.match(/[`*](.+\.txt)[`*]/i);
-      const hasTxt = fileMatch || markdownFileMatch || 
-                      trimmedLine.toLowerCase().includes('.txt') ||
-                      (i+1 < lines.length && lines[i+1].toLowerCase().includes('missing fields'));
-      
-      if (hasTxt) {
-        // Extract file name - prefer the markdown match if it exists
-        let fileName = '';
-        if (markdownFileMatch) {
-          fileName = markdownFileMatch[1];
-        } else if (fileMatch) {
-          fileName = fileMatch[1];
-        } else {
-          // Extract the file name using heuristics
-          const potentialFileName = trimmedLine.replace(/[\*`]/g, '').trim();
-          if (potentialFileName.toLowerCase().includes('.txt')) {
-            fileName = potentialFileName;
-          } else {
-            fileName = "Document " + (fileSections.length + 1);
-          }
-        }
-        
-        // Clean the filename
-        const cleanedFileName = cleanMarkdown(fileName);
-        
-        // Check if this file is in the missing documents list
-        const isMissing = missingDocuments.has(cleanedFileName.toLowerCase()) || 
-                          trimmedLine.toLowerCase().includes('missing') ||
-                          (i-1 >= 0 && lines[i-1].toLowerCase().includes('missing'));
-        
-        // Only proceed if the document is missing or has issues
-        if (isMissing) {
-          // Complete the current file section if exists
-          if (currentFileSection && currentFileSection.fields.length > 0) {
-            fileSections.push(currentFileSection);
-          }
-          
-          // Start a new file section
-          currentFileSection = {
-            fileName: cleanedFileName,
-            fields: [],
-            isMissing: isMissing
-          };
-        } else {
-          // Skip this file section as it's not missing or doesn't have issues
-          currentFileSection = null;
-        }
-        continue;
-      }
-      
-      // If we're in a file section for a missing document, add this as a field
-      if (currentFileSection) {
-        // Check if it's a bullet point or numbered item
-        if (/^[-•*]\s/.test(trimmedLine) || /^\d+\.\s/.test(trimmedLine) || 
-            /^[A-Za-z0-9][\w\s]+:/.test(trimmedLine)) {
-          
-          currentFileSection.fields.push(cleanMarkdown(trimmedLine));
-        } else if (currentFileSection.fields.length > 0) {
-          // Append to the last field if it's a continuation
-          const lastIndex = currentFileSection.fields.length - 1;
-          currentFileSection.fields[lastIndex] += ' ' + cleanMarkdown(trimmedLine);
-        } else {
-          // Add as a new field if we don't have any yet
-          currentFileSection.fields.push(cleanMarkdown(trimmedLine));
-        }
-      }
-    }
-    
-    // Add the last file section if it exists and has fields
-    if (currentFileSection && currentFileSection.fields.length > 0) {
-      fileSections.push(currentFileSection);
-    }
-    
-    // Convert file sections to fix sections, only including those with missing fields
-    if (fileSections.length > 0) {
-      fileSections.forEach(fileSection => {
-        if (fileSection.fields.length > 0) {
-          fixSections.push({
-            title: fileSection.fileName,
-            items: fileSection.fields
-          });
-        }
-      });
-    }
-    
-    // If no structured sections found, try to parse as general text
-    if (fixSections.length === 0) {
-      // Try to extract any field names from the text
-      const fieldRegex = /\*\*([^:]+):\*\*\s*([^*]+)/g;
-      let matches = [...agentOutput.matchAll(fieldRegex)];
-      
-      if (matches.length > 0) {
-        const items = matches.map(m => `${cleanMarkdown(m[1])}: ${cleanMarkdown(m[2])}`);
-        fixSections.push({
-          title: 'Required Information',
-          items: items
-        });
-      } else {
-        // Fallback to general guidance
-        const allText = agentOutput.replace(/\n+/g, ' ').trim();
-        if (allText) {
-          // Split into sentences and group them
-          const sentences = allText.split(/[.!?]+/).filter(s => s.trim().length > 10);
-          if (sentences.length > 0) {
-            fixSections.push({
-              title: 'Application Guidance',
-              items: sentences.map(s => cleanMarkdown(s.trim())).filter(s => s.length > 0)
-            });
-          }
-        }
-      }
-    }
-
-    return fixSections;
-  };
+  
 
   // Parse missing fields from agent output - only the MISSING FIELDS section
   const parseMissingFields = (agentOutput: string) => {
@@ -681,7 +542,6 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
   const getDocumentDescription = (documentName: string, agentOutput: string): string => {
     const lines = agentOutput.split('\n');
     let description = '';
-    let foundDocument = false;
     
     // First try to find exact document name
     for (let i = 0; i < lines.length; i++) {
@@ -689,7 +549,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
       
       if (line.includes(documentName) && 
           (line.includes('.txt') || line.match(/^\d+\./))) {
-        foundDocument = true;
+        
         
         // Look at the next few lines for a description
         for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
@@ -856,35 +716,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
     setError('Opening Copilot Studio connections page...\n\nIf connections are already set up, please click "Retry" below to test the bot again.\n\nIf you see connection issues, review and reconnect any expired or failed connections, then return here and click "Retry".');
   };
   // Template URL mapping for missing documents
-  const getDocumentTemplate = (documentName: string) => {
-    const templates: Record<string, { url: string; description: string }> = {
-      'Design and Access Statement': {
-        url: '/templates/design-access-statement-template.pdf',
-        description: 'Template for Design and Access Statement including sections for design rationale, materials, and accessibility',
-      },
-      'Planning Statement': {
-        url: '/templates/planning-statement-template.pdf',
-        description: 'Template for Planning Statement covering proposed works and policy compliance',
-      },
-      'Flood Risk Assessment': {
-        url: '/templates/flood-risk-assessment-template.pdf',
-        description: 'Template for Flood Risk Assessment including flood zone identification and mitigation measures',
-      },
-      'Heritage Statement': {
-        url: '/templates/heritage-statement-template.pdf',
-        description: 'Template for Heritage Statement including asset description, impact assessment, and justification',
-      },
-      'Tree Survey or Arboricultural Report': {
-        url: '/templates/tree-survey-template.pdf',
-        description: 'Template for Tree Survey including locations, species, and protection measures',
-      },
-      'Biodiversity or Ecology Report': {
-        url: '/templates/biodiversity-ecology-template.pdf',
-        description: 'Template for Biodiversity/Ecology Report including habitat assessment and species protection',
-      },
-    };
-    return templates[documentName];
-  };
+  
 
   return (
     <Dialog
@@ -1213,11 +1045,16 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
                                 icon={getStatusIcon(doc.status)}
                                 label={doc.name}
                                 sx={{
-                                  bgcolor: doc.status === 'missing' ? '#e8f5e8' : '#ffebee',
+                                  bgcolor:
+                                    doc.status === 'complete'
+                                      ? '#e8f5e9' // green background for complete
+                                      : doc.status === 'missing'
+                                      ? '#ffebee' // red background for missing
+                                      : '#fff3e0', // orange for partial
                                   color: getStatusColor(doc.status),
                                   fontWeight: 500,
                                   '& .MuiChip-label': {
-                                    color: '#2E7D32', // Dark green text for document names
+                                    color: getStatusColor(doc.status),
                                   },
                                 }}
                               />
