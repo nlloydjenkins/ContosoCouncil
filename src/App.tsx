@@ -9,6 +9,7 @@ import MyApplications from './pages/MyApplications'
 import ApplicationDetails from './pages/ApplicationDetails'
 import HowItWorks from './pages/HowItWorks'
 import UploadDocument from './pages/UploadDocument'
+import Services from './pages/Services'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Box component="main" sx={{ flexGrow: 1, bgcolor: '#F7F9FB' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/my-applications" element={<MyApplications />} />
           <Route path="/application/:id" element={<ApplicationDetails />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
