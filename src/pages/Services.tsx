@@ -107,7 +107,7 @@ const Services: React.FC = () => {
       title: 'Council Tax',
       description: 'Council tax payments, exemptions, discounts, and billing inquiries.',
       category: 'housing-planning',
-      link: '#',
+      link: '/council-tax',
       popular: true,
     },
     
