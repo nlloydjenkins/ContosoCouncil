@@ -10,6 +10,7 @@ import ApplicationDetails from './pages/ApplicationDetails'
 import HowItWorks from './pages/HowItWorks'
 import UploadDocument from './pages/UploadDocument'
 import Services from './pages/Services'
+import CouncilTaxLookup from './pages/CouncilTaxLookup'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/council-tax" element={<CouncilTaxLookup />} />
           <Route path="/my-applications" element={<MyApplications />} />
           <Route path="/application/:id" element={<ApplicationDetails />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
