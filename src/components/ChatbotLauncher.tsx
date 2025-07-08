@@ -59,14 +59,14 @@ const ChatbotLauncher: React.FC = () => {
         <DialogContent sx={{ p: 0, height: '100%' }}>
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <iframe
-              src="https://defaultde6b5354c00a4c06888c81936c42d6.f2.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/cr41e_planCheckr/conversations?api-version=2022-03-01-preview"
+              src="https://defaultde6b5354c00a4c06888c81936c42d6.f2.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/cr41e_agent/webchat?api-version=2022-03-01-previewhttps://defaultde6b5354c00a4c06888c81936c42d6.f2.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/cr41e_agent/conversations?api-version=2022-03-01-preview"
               style={{
                 width: '100%',
                 height: '100%',
                 border: 'none',
                 borderRadius: '0 0 10px 10px',
               }}
-              title="Contoso Planning Chatbot"
+              title="Contoso Council Chatbot"
             />
           </Box>
         </DialogContent>
