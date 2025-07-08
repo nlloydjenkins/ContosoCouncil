@@ -51,7 +51,7 @@ const ChatbotLauncher: React.FC = () => {
             alignItems: 'center',
           }}
         >
-          Council Agent
+          Chat
           <IconButton onClick={handleClose} sx={{ color: 'white', p: 0.5 }}>
             <Close />
           </IconButton>
