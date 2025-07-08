@@ -59,7 +59,7 @@ const ChatbotLauncher: React.FC = () => {
         <DialogContent sx={{ p: 0, height: '100%' }}>
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <iframe
-              src="https://defaultde6b5354c00a4c06888c81936c42d6.f2.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/cr41e_agent/webchat?api-version=2022-03-01-previewhttps://defaultde6b5354c00a4c06888c81936c42d6.f2.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/cr41e_agent/conversations?api-version=2022-03-01-preview"
+              src="https://copilotstudio.microsoft.com/environments/Default-de6b5354-c00a-4c06-888c-81936c42d6f2/bots/cr41e_agent/webchat?__version__=2"
               style={{
                 width: '100%',
                 height: '100%',
