@@ -51,7 +51,7 @@ const ChatbotLauncher: React.FC = () => {
             alignItems: 'center',
           }}
         >
-          Planning Assistant
+          Chat
           <IconButton onClick={handleClose} sx={{ color: 'white', p: 0.5 }}>
             <Close />
           </IconButton>
@@ -59,14 +59,14 @@ const ChatbotLauncher: React.FC = () => {
         <DialogContent sx={{ p: 0, height: '100%' }}>
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <iframe
-              src="https://copilotstudio.microsoft.com/environments/Default-de6b5354-c00a-4c06-888c-81936c42d6f2/bots/cr41e_planCheckr/webchat?__version__=2"
+              src="https://copilotstudio.microsoft.com/environments/Default-de6b5354-c00a-4c06-888c-81936c42d6f2/bots/cr41e_agent/webchat?__version__=2"
               style={{
                 width: '100%',
                 height: '100%',
                 border: 'none',
                 borderRadius: '0 0 10px 10px',
               }}
-              title="Contoso Planning Chatbot"
+              title="Contoso Council Chatbot"
             />
           </Box>
         </DialogContent>

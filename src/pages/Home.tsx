@@ -18,10 +18,18 @@ import {
   Support,
   Nature,
   Park,
+  ListAlt,
 } from '@mui/icons-material'
 
 const Home: React.FC = () => {
   const quickLinks = [
+    {
+      title: 'Council Services',
+      description: 'Browse all available council services and support',
+      icon: <ListAlt fontSize="large" />,
+      link: '/services',
+      color: '#1B5E20',
+    },
     {
       title: 'My Applications',
       description: 'View and track your planning applications',
@@ -181,7 +189,7 @@ const Home: React.FC = () => {
         </Typography>
         <Grid container spacing={3} sx={{ mb: 6 }}>
           {quickLinks.map((link, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Grid item xs={12} sm={6} md={3} key={index}>
               <Card
                 className="nature-card fade-in"
                 sx={{

@@ -1,7 +1,7 @@
 import React from 'react'
 import { AppBar, Toolbar, Button, Box, Container } from '@mui/material'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Assignment, Info, CloudUpload } from '@mui/icons-material'
+import { Home, Assignment, Info, CloudUpload, ListAlt } from '@mui/icons-material'
 import Logo from './Logo'
 
 const Header: React.FC = () => {
@@ -9,6 +9,7 @@ const Header: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: <Home sx={{ mr: 1 }} /> },
+    { path: '/services', label: 'Services', icon: <ListAlt sx={{ mr: 1 }} /> },
     { path: '/my-applications', label: 'My Applications', icon: <Assignment sx={{ mr: 1 }} /> },
     { path: '/how-it-works', label: 'How It Works', icon: <Info sx={{ mr: 1 }} /> },
     { path: '/upload', label: 'Upload Documents', icon: <CloudUpload sx={{ mr: 1 }} /> },
