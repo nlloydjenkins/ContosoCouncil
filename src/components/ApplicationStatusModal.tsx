@@ -616,7 +616,7 @@ const ApplicationStatusModal: React.FC<ApplicationStatusModalProps> = ({
     setProgressMessage('Initializing connection to planning system...');
 
     try {
-      const prompt = `check planning application ${applicationRef}`;
+      const prompt = `check planning with application_id: ${applicationRef}`;
       setAgentPrompt(prompt); // Store the prompt in state
       console.log('Modal: Starting DirectLine request with popup auth, prompt:', prompt);
 
